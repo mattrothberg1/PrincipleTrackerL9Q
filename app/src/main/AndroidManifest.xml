@@ -3,6 +3,9 @@
     package="com.MattRothberg1GmailCom.PrincipleTrackerL9Q">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
 
     <application
         android:name=".MyApplication"
@@ -22,3 +25,4 @@
     </application>
 
 </manifest>
+

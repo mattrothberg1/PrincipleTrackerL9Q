@@ -2,6 +2,8 @@ package com.MattRothberg1GmailCom.PrincipleTrackerL9Q.estimote;
 
 import android.content.Context;
 
+import com.MattRothberg1GmailCom.PrincipleTrackerL9Q.MainActivity;
+
 import java.util.List;
 
 public class ProximityContentManager {
@@ -10,7 +12,7 @@ public class ProximityContentManager {
 
     private Listener listener;
 
-    public ProximityContentManager(Context context,
+    public ProximityContentManager(MainActivity context,
                                    List<BeaconID> beaconIDs,
                                    BeaconContentFactory beaconContentFactory) {
         final BeaconContentCache beaconContentCache = new BeaconContentCache(beaconContentFactory);
