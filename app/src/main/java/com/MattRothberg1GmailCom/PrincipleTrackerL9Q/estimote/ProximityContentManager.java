@@ -40,6 +40,8 @@ public class ProximityContentManager {
 
     }
 
+
+
     public void setListener(Listener listener) {
         this.listener = listener;
     }
