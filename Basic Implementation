@@ -1,0 +1,111 @@
+GRADLE
+dependencies{
+	compile 'io.realm:realm-android:0.87.4'
+}
+
+CODE
+public class Log extends RealmObject {
+  
+  @Required
+  public String data;
+  public String getData(){
+  	return data;
+  }
+  public void setData(final String data){
+  	this.data = data;
+  }
+
+}
+
+//private String getNicerData(){
+	//return nicerData.getText().toString().trim();//whatever
+//}
+
+
+private Realm mRealm;
+@Override
+public void onCreate(final Bundle savedInstanceState){
+	super.onCreate(savedInstanceState);
+	mRealm = mRealm.getInstance(getContext());
+}
+
+public void addLog(){
+	mRealm.beginTransaction();
+	Log log = mRealm.createObject(Log.class);
+	log.setData(beaconDetails);
+	mRealm.commitTransaction();
+}
+
+
+public void onContentChanged(Object content) {
+String text;
+Integer backgroundColor;
+if (content != null) {
+	EstimoteCloudBeaconDetails beaconDetails = (EstimoteCloudBeaconDetails) content;
+
+	//start
+	addLog();
+	//end
+
+	text = "You're in " + beaconDetails.getBeaconName() + "'s range!";
+	backgroundColor = BACKGROUND_COLORS.get(beaconDetails.getBeaconColor());
+} else {
+    text = "No beacons in range.";
+    backgroundColor = null;
+}
+((TextView) findViewById(R.id.textView)).setText(text);
+findViewById(R.id.relativeLayout).setBackgroundColor(
+backgroundColor != null ? backgroundColor : BACKGROUND_COLOR_NEUTRAL);
+}
+});
+
+
+//not 100% sure where this might go but this might work
+@Override
+public void onDestroy(){
+	super.onDestroy();
+	mRealm.close();
+}
+
+
+
+
+
+GOOGLE AUTH
+// Authenticating the User
+User user = User.login(Credentials.google("google token"),
+                       "REALM URL");
+
+// Opening a remote Realm
+String realmURL = "REALM URL";
+SyncConfiguration config = new SyncConfiguration.Builder(user, realmURL).build();
+Realm realm = Realm.getInstance(config);
+
+
+
+CODE IDEAS
+//list of logs
+@Override
+public void onDataAdded(final View view, @Nullable final Bundle savedInstanceState);
+super.onViewCreated(view, savedInstanceState);
+mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+mRecyclerView.setAdapter(new MyListAdapter(mRealm.allObjects(Log.class)));
+}
+
+public MyListAdapter(RealmResults<MyLogs> logs){
+	mLogs = logs;
+	mLogs.addChangeListener(this);
+}
+
+@Override
+public void onChange(){
+	notifyDataSetChanged();
+}
+
+
+//schema migration
+RealmConfiguration config = new RealmConfiguration.Builder(ontext)
+.deleteRealmIfMigrationNeeded()
+.build()
+
+
