@@ -13,7 +13,6 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
         EstimoteSDK.initialize(getApplicationContext(), "principle-tracker-l9q", "ff70ea3880224b111e6d76e904f0561c");
 
         // uncomment to enable debug-level logging
