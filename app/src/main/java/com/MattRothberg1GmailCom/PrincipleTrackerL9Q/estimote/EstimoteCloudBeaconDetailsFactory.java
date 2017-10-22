@@ -8,6 +8,9 @@ import com.estimote.coresdk.cloud.model.BeaconInfo;
 import com.estimote.coresdk.cloud.model.Color;
 import com.estimote.coresdk.common.exception.EstimoteCloudException;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+
 public class EstimoteCloudBeaconDetailsFactory implements BeaconContentFactory {
 
     private static final String TAG = "BeaconDetailsFactory";
@@ -20,8 +23,14 @@ public class EstimoteCloudBeaconDetailsFactory implements BeaconContentFactory {
 
             @Override
             public void success(BeaconInfo beaconInfo) {
-                callback.onContentReady(new EstimoteCloudBeaconDetails(
-                        beaconInfo.name, beaconInfo.color));
+                try {
+                    callback.onContentReady(new EstimoteCloudBeaconDetails(
+                            beaconInfo.name, beaconInfo.color));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (GeneralSecurityException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -31,7 +40,13 @@ public class EstimoteCloudBeaconDetailsFactory implements BeaconContentFactory {
                         + "token provided in the MyApplication are correct, and if the beacon with "
                         + "such ID is assigned to your Estimote Account. The error was: "
                         + e.toString());
-                callback.onContentReady(new EstimoteCloudBeaconDetails("beacon", Color.UNKNOWN));
+                try {
+                    callback.onContentReady(new EstimoteCloudBeaconDetails("beacon", Color.UNKNOWN));
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                } catch (GeneralSecurityException e1) {
+                    e1.printStackTrace();
+                }
             }
         });
     }

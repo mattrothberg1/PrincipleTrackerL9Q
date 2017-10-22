@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.MattRothberg1GmailCom.PrincipleTrackerL9Q.MainActivity;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.List;
 
 public class ProximityContentManager {
@@ -28,12 +30,18 @@ public class ProximityContentManager {
                 if (beaconID != null) {
                     beaconContentCache.getContent(beaconID, new BeaconContentFactory.Callback() {
                         @Override
-                        public void onContentReady(Object content) {
+                        public void onContentReady(Object content) throws IOException, GeneralSecurityException {
                             listener.onContentChanged(content);
                         }
                     });
                 } else {
-                    listener.onContentChanged(null);
+                    try {
+                        listener.onContentChanged(null);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (GeneralSecurityException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -47,7 +55,7 @@ public class ProximityContentManager {
     }
 
     public interface Listener {
-        void onContentChanged(Object content);
+        void onContentChanged(Object content) throws IOException, GeneralSecurityException;
     }
 
     public void startContentUpdates() {

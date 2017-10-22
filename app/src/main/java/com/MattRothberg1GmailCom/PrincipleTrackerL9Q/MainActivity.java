@@ -8,6 +8,17 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.model.AppendValuesResponse;
+import com.google.api.services.sheets.v4.model.ValueRange;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -64,6 +75,7 @@ import java.util.Map;
 
 public class MainActivity extends Activity
         implements EasyPermissions.PermissionCallbacks {
+
     GoogleAccountCredential mCredential;
     private TextView mOutputText;
     private Button mCallApiButton;
@@ -76,7 +88,7 @@ public class MainActivity extends Activity
 
     private static final String BUTTON_TEXT = "Call Google Sheets API";
     private static final String PREF_ACCOUNT_NAME = "accountName";
-    private static final String[] SCOPES = { SheetsScopes.SPREADSHEETS_READONLY };
+    private static final String[] SCOPES = { SheetsScopes.SPREADSHEETS };
     private static final String TAG = "MainActivity";
 
     private static final Map<Color, Integer> BACKGROUND_COLORS = new HashMap<>();
@@ -96,6 +108,17 @@ public class MainActivity extends Activity
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("myTag2", "TEst 111");
+
+        try {
+            new MakeRequestTask(mCredential).getDataFromApi();
+            postToSheets();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (GeneralSecurityException e) {
+            e.printStackTrace();
+        }
+        //Remove above
         super.onCreate(savedInstanceState);
         LinearLayout activityLayout = new LinearLayout(this);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
@@ -142,16 +165,29 @@ public class MainActivity extends Activity
                 .setBackOff(new ExponentialBackOff());
 
         proximityContentManager = new ProximityContentManager(this,
+
                 Arrays.asList(
                         new BeaconID("D0D3FA86-CA76-45EC-9BD9-6AF4012AA803", 51816, 56249),
                         new BeaconID("D0D3FA86-CA76-45EC-9BD9-6AF40E8162BF", 12110, 55284),
                         new BeaconID("D0D3FA86-CA76-45EC-9BD9-6AF4176B9BC5", 39922, 54118)),
                 new EstimoteCloudBeaconDetailsFactory());
+
+        try { //delete this
+            postToSheets();
+            findViewById(R.id.relativeLayout).setBackgroundColor(1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (GeneralSecurityException e) {
+            e.printStackTrace();
+        }
+
+
         proximityContentManager.setListener(new ProximityContentManager.Listener() {
             @Override
-            public void onContentChanged(Object content) {
+            public void onContentChanged(Object content) throws IOException, GeneralSecurityException {
                 String text;
                 Integer backgroundColor;
+
                 if (content != null) {
                     EstimoteCloudBeaconDetails beaconDetails = (EstimoteCloudBeaconDetails) content;
                     text = "You're in " + beaconDetails.getBeaconName() + "'s range!";
@@ -159,6 +195,7 @@ public class MainActivity extends Activity
                 } else {
                     text = "No beacons in range.";
                     backgroundColor = null;
+
                 }
                 ((TextView) findViewById(R.id.textView)).setText(text);
                 findViewById(R.id.relativeLayout).setBackgroundColor(
@@ -167,6 +204,56 @@ public class MainActivity extends Activity
         });
     }
 
+
+    private void postToSheets() throws IOException, GeneralSecurityException {
+        // The ID of the spreadsheet to update.
+
+
+        String spreadsheetId = "18dus_pI1vPrBDAgiIo59TUxQQ13fUaiLSa6paysGCbI"; // TODO: Update placeholder value.
+
+        // The A1 notation of a range to search for a logical table of data.
+        // Values will be appended after the last row of the table.
+        String range = "A1:C1"; // TODO: Update placeholder value.
+
+        // TODO: Assign values to desired fields of `requestBody`:
+        String content = "just now";
+        List<Object> data1 = new ArrayList<>();
+
+        data1.add (content);
+        List<List<Object>> data = new ArrayList<>();
+
+        data.add (data1);
+
+        ValueRange requestBody=new ValueRange();
+        requestBody.setValues(data);
+
+        Sheets sheetsService = createSheetsService();
+        Sheets.Spreadsheets.Values.Append request =
+                sheetsService.spreadsheets().values().append(spreadsheetId, range, requestBody);
+        AppendValuesResponse response = request.execute();
+
+        // TODO: Change code below to process the `response` object:
+
+        System.out.println(response);
+    }
+
+    public static Sheets createSheetsService() throws IOException, GeneralSecurityException {
+        HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+
+        // TODO: Change placeholder below to generate authentication credentials. See
+        // https://developers.google.com/sheets/quickstart/java#step_3_set_up_the_sample
+        //
+        // Authorize using one of the following scopes:
+        //   "https://www.googleapis.com/auth/drive"
+        //   "https://www.googleapis.com/auth/drive.file"
+        //   "https://www.googleapis.com/auth/spreadsheets"
+        GoogleCredential credential = null;
+
+        return new Sheets.Builder(httpTransport, jsonFactory, credential)
+                .setApplicationName("Google-SheetsSample/0.1")
+                .build();
+    }
 
 
     /**
@@ -367,6 +454,8 @@ public class MainActivity extends Activity
         dialog.show();
     }
 
+
+
     /**
      * An asynchronous task that handles the Google Sheets API call.
      * Placing the API calls in their own task ensures the UI stays responsive.
@@ -391,12 +480,13 @@ public class MainActivity extends Activity
         @Override
         protected List<String> doInBackground(Void... params) {
             try {
-                return getDataFromApi();
+               // return getDataFromApi(); // add this back
             } catch (Exception e) {
                 mLastError = e;
                 cancel(true);
                 return null;
             }
+            return null; //delete this
         }
 
         /**
@@ -405,21 +495,26 @@ public class MainActivity extends Activity
          * @return List of names and majors
          * @throws IOException
          */
-        private List<String> getDataFromApi() throws IOException {
+        public void getDataFromApi() throws IOException {
             String spreadsheetId = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms";
-            String range = "Class Data!A2:E";
-            List<String> results = new ArrayList<String>();
-            ValueRange response = this.mService.spreadsheets().values()
-                    .get(spreadsheetId, range)
+            String range = "Sheet1!A1:C1";
+            String content = "just now";
+            Log.d("myTag2", "TEst 502");
+            List<Object> data1 = new ArrayList<>();
+
+            data1.add (content);
+            List<List<Object>> data = new ArrayList<>();
+
+            data.add (data1);
+
+            ValueRange requestBody=new ValueRange();
+            requestBody.setValues(data);
+            Log.d("myTag2", "TEst 512");
+            this.mService.spreadsheets().values().update(spreadsheetId, range,requestBody)
+                    .setValueInputOption("RAW")
                     .execute();
-            List<List<Object>> values = response.getValues();
-            if (values != null) {
-                results.add("Name, Major");
-                for (List row : values) {
-                    results.add(row.get(0) + ", " + row.get(4));
-                }
-            }
-            return results;
+            Log.d("myTag2", "TEst 516");
+            return ;
         }
 
 
