@@ -2,17 +2,15 @@ package com.MattRothberg1GmailCom.PrincipleTrackerL9Q.res;
 import java.util.*;
 import io.realm.RealmObject;
 
-public class PrincipalMovement extends RealmObject  {
+public class trackingPrincipal extends RealmObject  {
     private Date time;
     private int room_id;
     private String status;
+    private String date;
 }
 
-public void setDate(String date) {
-    this.date = date;
-    }
-
-    public Date getDate() {
+public void setDate(String date) {this.date = date;}
+public Date getDate() {
     return date;
     }
 
