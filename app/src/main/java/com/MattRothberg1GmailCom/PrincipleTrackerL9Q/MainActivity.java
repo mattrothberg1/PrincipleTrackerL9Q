@@ -13,6 +13,7 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.NullValue;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.AppendValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
@@ -109,6 +110,10 @@ public class MainActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d("myTag2", "TEst 111");
+// Initialize credentials and service object.
+        mCredential = GoogleAccountCredential.usingOAuth2(
+                getApplicationContext(), Arrays.asList(SCOPES))
+                .setBackOff(new ExponentialBackOff());
 
         try {
             new MakeRequestTask(mCredential).getDataFromApi();
@@ -159,10 +164,6 @@ public class MainActivity extends Activity
 
         setContentView(R.layout.activity_main);
 
-        // Initialize credentials and service object.
-        mCredential = GoogleAccountCredential.usingOAuth2(
-                getApplicationContext(), Arrays.asList(SCOPES))
-                .setBackOff(new ExponentialBackOff());
 
         proximityContentManager = new ProximityContentManager(this,
 
@@ -496,8 +497,36 @@ public class MainActivity extends Activity
          * @throws IOException
          */
         public void getDataFromApi() throws IOException {
+            if (! isGooglePlayServicesAvailable()) {
+                acquireGooglePlayServices();
+            }  if (mCredential.getSelectedAccountName() == null) {
+                chooseAccount();
+
+            }
+            while(mCredential.getSelectedAccountName() == null){
+
+            }
+            if (! isDeviceOnline()) {
+                mOutputText.setText("No network connection available.");
+            }
             String spreadsheetId = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms";
-            String range = "Sheet1!A1:C1";
+            String range = "Sheet1!A1:B3";
+            List<String> results = new ArrayList<String>();
+            if(this.mService.spreadsheets().values().get(spreadsheetId, range) != null){
+                Log.d("mytag4", "IS NOT NULL");
+            }
+            ValueRange response = this.mService.spreadsheets().values()
+                    .get(spreadsheetId, range)
+                    .execute();
+            List<List<Object>> values = response.getValues();
+            if (values != null) {
+                results.add("Name, Major");
+                for (List row : values) {
+                    results.add(row.get(0) + ", " + row.get(1));
+                }
+            }
+            Log.d("myTag3", results.toString());
+            /*
             String content = "just now";
             Log.d("myTag2", "TEst 502");
             List<Object> data1 = new ArrayList<>();
@@ -514,7 +543,7 @@ public class MainActivity extends Activity
                     .setValueInputOption("RAW")
                     .execute();
             Log.d("myTag2", "TEst 516");
-            return ;
+            return ;*/
         }
 
 
