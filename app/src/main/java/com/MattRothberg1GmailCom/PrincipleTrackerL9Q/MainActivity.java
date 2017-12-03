@@ -52,21 +52,44 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+//<<<<<<< HEAD
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import io.realm.Realm;
+import io.realm.RealmResults;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 //
 // Running into any issues? Drop us an email to: contact@estimote.com
 //
+//=======
+
+//realm imports
+
+//
+// Running into any issues? Drop us an email to: contact@estimote.com
+//
+
+
+
+
+
+
+
+
+
+
+// jack and tommy 11.15
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
     private static final Map<Color, Integer> BACKGROUND_COLORS = new HashMap<>();
+
 
     static {
         BACKGROUND_COLORS.put(Color.ICY_MARSHMALLOW, android.graphics.Color.rgb(109, 170, 199));
@@ -96,6 +119,11 @@ public class MainActivity extends AppCompatActivity {
                 Integer backgroundColor;
                 if (content != null) {
                     EstimoteCloudBeaconDetails beaconDetails = (EstimoteCloudBeaconDetails) content;
+
+                    //add to realm
+                    realm = Realm.getDefaultInstance();
+                    addLog(realm);
+
                     text = "You're in " + beaconDetails.getBeaconName() + "'s range!";
                     backgroundColor = BACKGROUND_COLORS.get(beaconDetails.getBeaconColor());
                 } else {
@@ -108,6 +136,35 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+
+
+
+
+
+
+
+    @Override
+    protected void addLog(Realm realm){
+        realm.executeTransaction(new Realm.Transaction(){
+            Log log = realm.createObject(Log.class);
+            log.setTime();
+            log.setRoomID();
+            log.setStatus();
+        });
+    }
+
+
+    @Override
+    protected void showLogs(){
+        RealmResults<Log> results1 = realm.where(Log.class).findAll();
+        for(Log l: results1){
+            Log.d(l.time, l.roomID);
+        }
+    }
+
+
+
 
     @Override
     protected void onResume() {

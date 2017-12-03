@@ -39,4 +39,11 @@ dependencies {
     }
 }
 
+//<<<<<<< HEAD
 apply plugin: 'com.google.gms.google-services'
+//=======
+
+dependencies{
+    compile 'io.realm:android-adapters:2.0.0'
+}
+//>>>>>>> jack and tommy 11.15
